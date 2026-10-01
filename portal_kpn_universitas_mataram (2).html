@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal KPN Universitas Mataram</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
+
+    <header class="bg-amber-600 text-white shadow-md">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white p-1 rounded-xl shadow w-11 h-11 flex items-center justify-center overflow-hidden">
+                    <img src="https://lh3.googleusercontent.com/d/1u4dBB6e6PBtDshuSXCUl7dq_1Zymr92C" alt="Logo UNRAM" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='https://placehold.co/100x100/d97706/ffffff?text=UNRAM';">
+                </div>
+                <div>
+                    <h1 class="font-bold text-base md:text-lg leading-tight">Koperasi Pegawai Negeri (KPN)</h1>
+                    <p class="text-xs text-amber-100">Universitas Mataram</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div id="userHeaderInfo" class="hidden flex items-center space-x-3">
+                    <span id="headerName" class="text-sm font-medium"></span>
+                    <button onclick="logout()" class="bg-amber-700 hover:bg-amber-800 text-xs px-3 py-1.5 rounded-lg transition font-medium border border-amber-500">
+                        Keluar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl w-full mx-auto px-4 py-8 flex-grow flex items-center justify-center">
+
+        <!-- Login View -->
+        <div id="loginView" class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-8">
+            <div class="text-center mb-6">
+                <div class="inline-block bg-amber-50 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full mb-3">Portal KPN UNRAM</div>
+                <h2 id="loginTitle" class="text-2xl font-bold text-slate-900">Masuk Sistem Simpanan</h2>
+                <p id="loginSubtitle" class="text-sm text-slate-500 mt-1">Masukkan NIP / ID Anggota Anda</p>
+            </div>
+
+            <!-- Error message container -->
+            <div id="loginError" class="hidden mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl"></div>
+
+            <!-- Loading overlay -->
+            <div id="loginLoader" class="hidden mb-4 p-3 bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-xl flex items-center justify-center space-x-2">
+                <svg class="animate-spin h-4 w-4 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Menghubungkan ke database...</span>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label id="labelId" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">NIP / ID Anggota</label>
+                    <input type="text" id="inputId" required placeholder="Contoh: 19820310..." 
+                        class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Kata Sandi</label>
+                    <input type="password" id="inputPassword" required placeholder="••••••••" 
+                        class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm transition">
+                </div>
+                <button type="submit" 
+                    class="w-full bg-amber-600 hover:bg-amber-700 text-white font-medium py-3 rounded-xl transition shadow-lg shadow-amber-600/20 text-sm">
+                    Masuk ke Sistem
+                </button>
+            </form>
+        </div>
+
+        <!-- Dashboard View (Member) -->
+        <div id="dashboardView" class="hidden w-full space-y-6">
+            <div class="bg-gradient-to-r from-amber-700 to-yellow-800 text-white rounded-2xl p-6 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <span class="text-xs uppercase tracking-wider text-amber-200 font-semibold bg-amber-900/40 px-3 py-1 rounded-full">Anggota KPN UNRAM</span>
+                    <h2 id="dashName" class="text-2xl font-bold mt-2">Nama Anggota</h2>
+                    <p class="text-xs text-amber-100 mt-0.5">NIP / ID: <span id="dashId" class="font-mono bg-amber-900/50 px-2 py-0.5 rounded"></span></p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/10 w-full md:w-auto text-left md:text-right">
+                    <p class="text-xs text-amber-200 uppercase font-medium tracking-wider">Total Seluruh Simpanan</p>
+                    <p id="dashTotal" class="text-2xl md:text-3xl font-extrabold text-white mt-0.5">Rp 0</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-100 hover:shadow-lg transition">
+                    <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-bold text-lg mb-4">P</div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Simpanan Pokok</p>
+                    <h3 id="dashPokok" class="text-xl font-bold text-slate-900 mt-1">Rp 0</h3>
+                    <p class="text-xs text-slate-500 mt-2">Setoran pokok saat pertama kali tercatat sebagai anggota koperasi.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-100 hover:shadow-lg transition">
+                    <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center font-bold text-lg mb-4">W</div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Simpanan Wajib</p>
+                    <h3 id="dashWajib" class="text-xl font-bold text-slate-900 mt-1">Rp 0</h3>
+                    <p class="text-xs text-slate-500 mt-2">Iuran potongan gaji bulanan yang rutin dibayarkan anggota.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-100 hover:shadow-lg transition">
+                    <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center font-bold text-lg mb-4">S</div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Simpanan Sukarela</p>
+                    <h3 id="dashSukarela" class="text-xl font-bold text-slate-900 mt-1">Rp 0</h3>
+                    <p class="text-xs text-slate-500 mt-2">Tabungan sukarela anggota dengan fleksibilitas penarikan.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard View (Admin) -->
+        <div id="adminView" class="hidden w-full space-y-6">
+            <div class="bg-gradient-to-r from-slate-800 to-amber-900 text-white rounded-2xl p-6 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <span class="text-xs uppercase tracking-wider text-amber-300 font-semibold bg-amber-900/50 px-3 py-1 rounded-full">Administrator KPN UNRAM</span>
+                    <h2 class="text-2xl font-bold mt-2">Panel Rekapitulasi Anggota</h2>
+                    <p class="text-xs text-slate-300 mt-0.5">Kelola dan pantau seluruh data simpanan koperasi</p>
+                </div>
+                <button onclick="loadAdminData()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium px-4 py-2.5 rounded-xl transition shadow">
+                    Muat Ulang Data Sheets
+                </button>
+            </div>
+
+            <!-- Admin Summary Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-100">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Anggota Terdaftar</p>
+                    <h3 id="adminTotalMembers" class="text-2xl font-bold text-slate-900 mt-1">0 Orang</h3>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-100">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Akumulasi Seluruh Simpanan Koperasi</p>
+                    <h3 id="adminTotalSavings" class="text-2xl font-bold text-amber-700 mt-1">Rp 0</h3>
+                </div>
+            </div>
+
+            <!-- Members Table -->
+            <div class="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                    <h3 class="font-bold text-slate-800 text-sm">Daftar Rekap Simpanan Anggota</h3>
+                    <input type="text" id="adminSearch" oninput="filterAdminTable()" placeholder="Cari NIP / Nama..." class="px-3 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100/75 text-slate-600 uppercase font-semibold">
+                                <th class="p-3">ID / NIP</th>
+                                <th class="p-3">Nama Anggota</th>
+                                <th class="p-3 text-right">Pokok</th>
+                                <th class="p-3 text-right">Wajib</th>
+                                <th class="p-3 text-right">Sukarela</th>
+                                <th class="p-3 text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody" class="divide-y divide-slate-100 text-slate-700">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-100 py-4 text-center text-xs text-slate-400">
+        &copy; 2026 Koperasi Pegawai Negeri Universitas Mataram (UNRAM). All rights reserved.
+    </footer>
+
+    <script>
+        // Masukkan URL Web App Google Sheets Anda di bawah ini
+        let customScriptUrl = 'https://script.google.com/macros/s/AKfycbx1Wvn5VYVw8QoIxg9lWJbQQ0OPIZb7USIReg7NyaXHfvx0MjRerC1dTgwJ0z7cbfFSBg/exec';
+        let cachedAdminData = [];
+
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const idVal = document.getElementById('inputId').value.trim();
+            const passVal = document.getElementById('inputPassword').value.trim();
+            const errorBox = document.getElementById('loginError');
+            const loader = document.getElementById('loginLoader');
+
+            errorBox.classList.add('hidden');
+
+            if (!customScriptUrl || customScriptUrl.includes('AKfycbz...')) {
+                errorBox.textContent = "URL Google Sheets belum dikonfigurasi. Harap masukkan URL Web App Google Apps Script Anda pada variabel customScriptUrl di dalam kode.";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            loader.classList.remove('hidden');
+            try {
+                // Deteksi otomatis jika ID berawalan 'admin', arahkan ke action adminLogin
+                const action = (idVal.toLowerCase().startsWith('admin') || idVal.toLowerCase() === 'administrator') ? 'adminLogin' : 'login';
+                const fetchUrl = `${customScriptUrl}?action=${action}&id=${encodeURIComponent(idVal)}&password=${encodeURIComponent(passVal)}`;
+                
+                const response = await fetch(fetchUrl);
+                const result = await response.json();
+                loader.classList.add('hidden');
+
+                if (result.status === 'success') {
+                    if (action === 'adminLogin') {
+                        renderAdminDashboard(result);
+                    } else {
+                        renderDashboard({
+                            id: result.id,
+                            nama: result.nama,
+                            pokok: result.pokok,
+                            wajib: result.wajib,
+                            sukarela: result.sukarela
+                        });
+                    }
+                } else {
+                    errorBox.textContent = result.message || "Login gagal! Periksa kembali NIP/ID dan Kata Sandi Anda.";
+                    errorBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                loader.classList.add('hidden');
+                errorBox.textContent = "Gagal terhubung ke Google Sheets Web App. Periksa koneksi internet atau izin deploy URL Apps Script.";
+                errorBox.classList.remove('hidden');
+            }
+        }
+
+        function renderDashboard(data) {
+            const total = data.pokok + data.wajib + data.sukarela;
+
+            document.getElementById('dashName').textContent = data.nama;
+            document.getElementById('dashId').textContent = data.id;
+            document.getElementById('dashPokok').textContent = formatRupiah(data.pokok);
+            document.getElementById('dashWajib').textContent = formatRupiah(data.wajib);
+            document.getElementById('dashSukarela').textContent = formatRupiah(data.sukarela);
+            document.getElementById('dashTotal').textContent = formatRupiah(total);
+
+            document.getElementById('loginView').classList.add('hidden');
+            document.getElementById('dashboardView').classList.remove('hidden');
+            document.getElementById('headerName').textContent = data.nama;
+            document.getElementById('userHeaderInfo').classList.remove('hidden');
+        }
+
+        async function renderAdminDashboard(result) {
+            cachedAdminData = result.members || [];
+            populateAdminTable(cachedAdminData);
+
+            document.getElementById('loginView').classList.add('hidden');
+            document.getElementById('adminView').classList.remove('hidden');
+            document.getElementById('headerName').textContent = "Administrator KPN";
+            document.getElementById('userHeaderInfo').classList.remove('hidden');
+        }
+
+        function populateAdminTable(members) {
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = '';
+
+            let totalAllMembers = 0;
+            let grandTotalSavings = 0;
+
+            if (members.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Belum ada data anggota yang tersimpan.</td></tr>`;
+                document.getElementById('adminTotalMembers').textContent = '0 Orang';
+                document.getElementById('adminTotalSavings').textContent = 'Rp 0';
+                return;
+            }
+
+            members.forEach(m => {
+                const total = (Number(m.pokok) || 0) + (Number(m.wajib) || 0) + (Number(m.sukarela) || 0);
+                grandTotalSavings += total;
+                totalAllMembers++;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-mono font-medium text-slate-800">${m.id}</td>
+                    <td class="p-3 font-semibold text-slate-900">${m.nama}</td>
+                    <td class="p-3 text-right">${formatRupiah(m.pokok)}</td>
+                    <td class="p-3 text-right">${formatRupiah(m.wajib)}</td>
+                    <td class="p-3 text-right">${formatRupiah(m.sukarela)}</td>
+                    <td class="p-3 text-right font-bold text-amber-700">${formatRupiah(total)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('adminTotalMembers').textContent = totalAllMembers + ' Orang';
+            document.getElementById('adminTotalSavings').textContent = formatRupiah(grandTotalSavings);
+        }
+
+        function filterAdminTable() {
+            const keyword = document.getElementById('adminSearch').value.toLowerCase();
+            const filtered = cachedAdminData.filter(m => 
+                m.id.toLowerCase().includes(keyword) || m.nama.toLowerCase().includes(keyword)
+            );
+            populateAdminTable(filtered);
+        }
+
+        async function loadAdminData() {
+            try {
+                const response = await fetch(`${customScriptUrl}?action=getAdminData`);
+                const result = await response.json();
+                if (result.status === 'success') {
+                    cachedAdminData = result.members || [];
+                    populateAdminTable(cachedAdminData);
+                }
+            } catch(e) {
+                console.error("Gagal memperbarui data admin");
+            }
+        }
+
+        function logout() {
+            document.getElementById('inputId').value = '';
+            document.getElementById('inputPassword').value = '';
+            document.getElementById('dashboardView').classList.add('hidden');
+            document.getElementById('adminView').classList.add('hidden');
+            document.getElementById('userHeaderInfo').classList.add('hidden');
+            document.getElementById('loginView').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
